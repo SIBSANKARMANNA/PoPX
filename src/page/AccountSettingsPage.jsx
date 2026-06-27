@@ -1,8 +1,21 @@
 import { usePopX } from '../context/PopContext';
+import { useEffect } from 'react';
 
 
 const AccountSettingsPage = () => {
-  const { currentUser } = usePopX();
+  const { currentUser, logout } = usePopX();
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const session = JSON.parse(localStorage.getItem('popx_session'));
+      if (!session || Date.now() - session.loginTime >= 2 * 60 * 1000) {
+        logout(); // clears session + redirects to welcome
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+
 
   if (!currentUser) {
     return null;

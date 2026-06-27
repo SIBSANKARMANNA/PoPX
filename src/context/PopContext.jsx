@@ -1,4 +1,4 @@
-import  { createContext, useContext, useState } from 'react';
+import { createContext, useContext, useState, useEffect } from 'react';
 
 export const PopXContext = createContext();
 
@@ -18,6 +18,20 @@ export const PopXProvider = ({ children }) => {
 
   const [currentUser, setCurrentUser] = useState(null);
   const [currentPage, setCurrentPage] = useState('welcome');
+  const [sessionDuration] = useState(30 * 60 * 1000);
+
+ 
+  useEffect(() => {
+    const stored = localStorage.getItem('popx_session');
+    const session = stored ? JSON.parse(stored) : null;
+    if (session?.loggedIn && Date.now() - session.loginTime < sessionDuration) {
+      const user = accounts.find(a => a.id === session.userId);
+      if (user) {
+        setCurrentUser(user);
+        setCurrentPage('settings');
+      }
+    }
+  }, []); // empty array = runs only once after first render
 
   const createAccount = (data) => {
     const newAccount = {
@@ -35,6 +49,11 @@ export const PopXProvider = ({ children }) => {
     );
     if (account) {
       setCurrentUser(account);
+      localStorage.setItem('popx_session', JSON.stringify({
+        loggedIn: true,
+        userId: account.id,
+        loginTime: Date.now(),
+      }));
       return true;
     }
     return false;
@@ -43,20 +62,11 @@ export const PopXProvider = ({ children }) => {
   const logout = () => {
     setCurrentUser(null);
     setCurrentPage('welcome');
+    localStorage.removeItem('popx_session');
   };
 
   return (
-    <PopXContext.Provider
-      value={{
-        accounts,
-        currentUser,
-        currentPage,
-        setCurrentPage,
-        createAccount,
-        login,
-        logout,
-      }}
-    >
+    <PopXContext.Provider value={{ accounts, currentUser, currentPage, setCurrentPage, createAccount, login, logout }}>
       {children}
     </PopXContext.Provider>
   );

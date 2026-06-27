@@ -3,7 +3,7 @@ import { usePopX } from '../context/PopContext';
 // import "./SignUpPage.css";
 
 const SignUpPage = () => {
-  const { setCurrentPage, createAccount, login } = usePopX();
+  const { setCurrentPage, createAccount } = usePopX();
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -38,8 +38,9 @@ const SignUpPage = () => {
     }
 
     const newAccount = createAccount(formData);
-    login(newAccount.email, newAccount.password);
-    setCurrentPage('settings');
+    // login(newAccount.email, newAccount.password);
+    console.log('Account created:', newAccount);
+    setCurrentPage('signin');
   };
 
   return (
